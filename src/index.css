@@ -4,6 +4,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Optional: Custom keyframe for pulse animation around the avatar */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s infinite ease-in-out;
+}
 /* Base Resets */
 *,
 *::before,

@@ -1,19 +1,80 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import "./index.css";
 
 function App() {
   const [activeSection, setActiveSection] = useState("home");
   const [darkMode, setDarkMode] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const sectionsRef = useRef([]);
+  const taglineText = "Backend | Cloud | AI developer";
+  const [displayedTagline, setDisplayedTagline] = useState("");
+  const [isTyping, setIsTyping] = useState(true);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [messageStatus, setMessageStatus] = useState(null);
 
-  // Add this function for handling resume download
   const handleResumeDownload = () => {
-    // Replace with your actual resume URL or file path
     const resumeUrl = "/CV.Dev.pdf";
     window.open(resumeUrl, "_blank");
   };
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [id]: value
+    }));
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault(); 
+    setIsSubmitting(true);
+    setMessageStatus(null); 
+    const API_ENDPOINT = '/api/send-email';
+
+    try {
+      const response = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setMessageStatus('success');
+        setFormData({ name: '', email: '', subject: '', message: '' }); 
+      } else {
+        const errorData = await response.json();
+        setMessageStatus('error');
+        console.error('Error submitting form:', errorData);
+      }
+    } catch (error) {
+      setMessageStatus('error');
+      console.error('Network error submitting form:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+
+  useEffect(() => {
+    if (isTyping) {
+      let i = 0;
+      const typingInterval = setInterval(() => {
+        setDisplayedTagline(taglineText.substring(0, i));
+        i++;
+        if (i > taglineText.length) {
+          clearInterval(typingInterval);
+          setIsTyping(false);
+        }
+      }, 50);
+      return () => clearInterval(typingInterval);
+    }
+  }, [isTyping, taglineText]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -55,7 +116,6 @@ function App() {
     setMenuOpen(!menuOpen);
   };
 
-  // Enhanced skills data
   const skills = [
     { name: "C/C++", level: 90 },
     { name: "Python", level: 95 },
@@ -66,23 +126,23 @@ function App() {
   ];
 
   return (
-    <div className={`min-h-screen ${darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"} font-sans transition-colors duration-500`}>
+    <div className={`min-h-screen ${darkMode ? "bg-gradient-to-br from-gray-900 to-black text-gray-100" : "bg-gray-50 text-gray-900"} font-sans transition-colors duration-500`}>
       {/* Floating Navigation */}
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 100 }}
-        className={`fixed top-0 w-full z-50 ${darkMode ? "bg-gray-800/90" : "bg-white/90"} backdrop-blur-md shadow-lg`}
+        className={`fixed top-0 w-full z-50 ${darkMode ? "bg-gray-800/80" : "bg-white/80"} backdrop-blur-md shadow-lg`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <motion.div 
-              whileHover={{ scale: 1.05 }} 
+            <motion.div
+              whileHover={{ scale: 1.05 }}
               className="font-bold text-xl bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent"
             >
               Dev Garg
             </motion.div>
-            
+
             <div className="hidden md:flex space-x-1">
               {['home', 'about', 'skills', 'projects', 'experience', 'contact'].map((item) => (
                 <motion.button
@@ -103,9 +163,27 @@ function App() {
                   {item}
                 </motion.button>
               ))}
+              {/* Dark mode toggle in nav */}
+              <button
+                onClick={toggleDarkMode}
+                className={`p-2 rounded-full text-sm ${
+                  darkMode ? "text-yellow-400 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"
+                }`}
+                aria-label="Toggle dark mode"
+              >
+                {darkMode ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.45 4.75a.75.75 0 001.06-1.06L15 13.19V11a.75.75 0 00-1.5 0v2.19l-1.06 1.06a.75.75 0 000 1.06zM3.75 10a.75.75 0 01.75-.75h2.19l1.06-1.06a.75.75 0 011.06 1.06L8.19 10h2.19a.75.75 0 010 1.5h-2.19l-1.06 1.06a.75.75 0 01-1.06-1.06L3.75 10zM10 18a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM4 6a.75.75 0 01.75-.75h1.06l1.06-1.06a.75.75 0 011.06 1.06L6.19 6H4a.75.75 0 01-.75-.75zm9.25 0a.75.75 0 01.75-.75h2.19l1.06-1.06a.75.75 0 011.06 1.06L16.19 6H14a.75.75 0 01-.75-.75z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </button>
             </div>
 
-            <button 
+            <button
               onClick={toggleMenu}
               className="md:hidden p-2 rounded-full focus:outline-none"
               aria-label="Toggle menu"
@@ -121,7 +199,7 @@ function App() {
       {/* Mobile Menu */}
       <AnimatePresence>
         {menuOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -156,29 +234,32 @@ function App() {
         ref={(el) => (sectionsRef.current[0] = el)}
         className="h-screen flex flex-col justify-center items-center text-center px-4 relative overflow-hidden"
       >
-        {/* Animated background particles */}
-        <div className="absolute inset-0 -z-10">
-          {[...Array(20)].map((_, i) => (
+        {/* Animated background particles - ENHANCED */}
+        <div className="absolute inset-0 -z-10 pointer-events-none">
+          {[...Array(50)].map((_, i) => (
             <motion.div
               key={i}
               animate={{
-                x: [0, Math.random() * 200 - 100],
-                y: [0, Math.random() * 200 - 100],
-                opacity: [0.2, 0.5, 0.2]
+                x: [0, Math.random() * 400 - 200, 0],
+                y: [0, Math.random() * 400 - 200, 0],
+                opacity: [0.05, 0.25, 0.05],
+                scale: [0.5, 1.5, 0.5]
               }}
               transition={{
-                duration: Math.random() * 10 + 10,
+                duration: Math.random() * 20 + 15,
                 repeat: Infinity,
-                repeatType: "reverse"
+                repeatType: "reverse",
+                ease: "easeInOut"
               }}
               className={`absolute rounded-full ${
-                darkMode ? "bg-purple-500/20" : "bg-purple-300/30"
-              }`}
+                darkMode ? "bg-purple-500/10" : "bg-purple-300/15"
+              } mix-blend-screen`}
               style={{
                 width: `${Math.random() * 10 + 5}px`,
                 height: `${Math.random() * 10 + 5}px`,
                 left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`
+                top: `${Math.random() * 100}%`,
+                filter: `blur(${Math.random() * 1.5}px)`
               }}
             />
           ))}
@@ -188,55 +269,56 @@ function App() {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="max-w-3xl mx-auto"
+          className="max-w-3xl mx-auto z-10"
         >
+          {/* "Hi, I'm Dev Garg." text - Reverted to gradient */}
           <motion.h1
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-5xl sm:text-6xl md:text-7xl font-extrabold bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent mb-4"
+            className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-white mb-4"
           >
-            Dev Garg
+            <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent">Hi, I'm Dev Garg</span>
           </motion.h1>
-          
+
+          {/* Tagline with Typewriter effect */}
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
+            key={displayedTagline}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className={`text-xl md:text-2xl mb-8 ${darkMode ? "text-gray-300" : "text-gray-600"}`}
           >
-            Backend • Cloud • AI Developer
+            {displayedTagline}
+            <motion.span
+              animate={{ opacity: [0, 1, 0] }}
+              transition={{ repeat: Infinity, duration: 0.8, ease: "easeInOut" }}
+              className="inline-block ml-1"
+            >
+              |
+            </motion.span>
           </motion.p>
-          
+
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.9 }}
+            transition={{ delay: 1.2 }}
             className="flex flex-wrap justify-center gap-4"
           >
-            <motion.a
-              href="#projects"
-              whileHover={{ y: -3 }}
+            <motion.button
+              onClick={() => scrollToSection("contact")}
+              whileHover={{ y: -3, scale: 1.02, boxShadow: "0 8px 20px rgba(128, 0, 128, 0.4)" }}
               whileTap={{ scale: 0.95 }}
-              className={`px-6 py-3 rounded-full font-medium shadow-lg ${
-                darkMode ? "bg-white text-gray-900" : "bg-gray-900 text-white"
-              }`}
+              className={`px-8 py-4 rounded-full font-semibold text-lg shadow-lg
+                ${darkMode ? "bg-purple-600 hover:bg-purple-700 text-white" : "bg-purple-500 hover:bg-purple-600 text-white"}
+                transition-all duration-200 ease-in-out`}
             >
-              View Projects
-            </motion.a>
-            <motion.a
-              href="#contact"
-              whileHover={{ y: -3 }}
-              whileTap={{ scale: 0.95 }}
-              className={`px-6 py-3 rounded-full font-medium ${
-                darkMode ? "border border-white text-white" : "border border-gray-900 text-gray-900"
-              }`}
-            >
-              Contact Me
-            </motion.a>
+              Connect with me
+            </motion.button>
           </motion.div>
         </motion.div>
 
+        {/* Scroll down indicator */}
         <motion.div
           animate={{ y: [0, 15, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
@@ -244,7 +326,7 @@ function App() {
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-8 w-8"
+            className="h-8 w-8 text-gray-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -324,7 +406,7 @@ function App() {
                       <span className="text-xl">📱</span>
                     </motion.a>
                   </div>
-                  {/* Add resume button in about section */}
+                  {/*resume button in about section */}
                   <motion.button
                     onClick={handleResumeDownload}
                     whileHover={{ scale: 1.05 }}
@@ -531,7 +613,6 @@ function App() {
                   "Built independent modules focusing on data extraction, backend logic, and automated workflows",
                   "Gained exposure to research-driven development practices and early-stage prototyping"
                 ],
-                icon: "🔬"
               }
             ].map((exp, index) => (
               <motion.div
@@ -540,14 +621,15 @@ function App() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className={`relative mb-8 ${index % 2 === 0 ? "pr-8 text-right" : "pl-8"}`}
+                className={`relative mb-8 ${index % 2 === 0 ? "pr-8 text-middle" : "pl-8"}`}
               >
                 <div
                   className={`absolute top-0 left-1/2 w-8 h-8 rounded-full flex items-center justify-center -translate-x-1/2 ${
                     darkMode ? "bg-purple-600" : "bg-purple-400"
                   }`}
                 >
-                  {exp.icon}
+                  {/* Icon for experience - you can replace with specific ones */}
+                  {index === 0 && "🔬"}
                 </div>
                 <div
                   className={`p-6 rounded-lg shadow-md ${
@@ -591,14 +673,14 @@ function App() {
                 <span className={`absolute bottom-1 left-0 w-full h-2 ${darkMode ? "bg-purple-500/50" : "bg-purple-300/50"} -z-0`}></span>
               </span>
             </h2>
-            
+
             <p className={`text-lg mb-8 max-w-2xl mx-auto ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
               Interested in working together or have questions about my work? Feel free to reach out through any of these channels.
             </p>
-            
+
             <div className="flex flex-wrap justify-center gap-6 mb-12">
               {[
-                { icon: "📧", label: "Email", link: "mailto:devgarg062@gmail.com", text: "devgarg062@gmail.com" },
+                { icon: "�", label: "Email", link: "mailto:devgarg062@gmail.com", text: "devgarg062@gmail.com" },
                 { icon: "💼", label: "LinkedIn", link: "https://linkedin.com/in/devgarg0203", text: "devgarg0203" },
                 { icon: "🐙", label: "GitHub", link: "https://github.com/Devgarg062", text: "Devgarg062" },
                 { icon: "📱", label: "Phone", link: "tel:8447052600", text: "+91 8447052600" },
@@ -625,8 +707,9 @@ function App() {
                 </motion.a>
               ))}
             </div>
-            
+
             <motion.form
+              onSubmit={handleSubmit}
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -638,51 +721,86 @@ function App() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="name" className={`block text-sm font-medium mb-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Name</label>
-                    <input 
-                      type="text" 
-                      id="name" 
+                    <input
+                      type="text"
+                      id="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
                       className={`w-full px-4 py-2 rounded-lg border ${darkMode ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-900"} focus:outline-none focus:ring-2 focus:ring-purple-500`}
                       placeholder="Your name"
+                      required
                     />
                   </div>
                   <div>
                     <label htmlFor="email" className={`block text-sm font-medium mb-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Email</label>
-                    <input 
-                      type="email" 
-                      id="email" 
+                    <input
+                      type="email"
+                      id="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       className={`w-full px-4 py-2 rounded-lg border ${darkMode ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-900"} focus:outline-none focus:ring-2 focus:ring-purple-500`}
                       placeholder="your@email.com"
+                      required
                     />
                   </div>
                 </div>
                 <div>
                   <label htmlFor="subject" className={`block text-sm font-medium mb-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Subject</label>
-                  <input 
-                    type="text" 
-                    id="subject" 
+                  <input
+                    type="text"
+                    id="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
                     className={`w-full px-4 py-2 rounded-lg border ${darkMode ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-900"} focus:outline-none focus:ring-2 focus:ring-purple-500`}
                     placeholder="What's this about?"
+                    required
                   />
                 </div>
                 <div>
                   <label htmlFor="message" className={`block text-sm font-medium mb-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Message</label>
-                  <textarea 
-                    id="message" 
+                  <textarea
+                    id="message"
                     rows="4"
+                    value={formData.message}
+                    onChange={handleInputChange}
                     className={`w-full px-4 py-2 rounded-lg border ${darkMode ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-900"} focus:outline-none focus:ring-2 focus:ring-purple-500`}
                     placeholder="Your message here..."
+                    required
                   ></textarea>
                 </div>
                 <motion.button
+                  type="submit"
+                  disabled={isSubmitting}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  type="submit"
-                  className="w-full py-3 px-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition"
+                  className={`w-full py-3 px-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  Send Message
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                 </motion.button>
-                {/* Add resume button in contact form */}
-                
+
+                {/* Message Status Feedback */}
+                <AnimatePresence>
+                  {messageStatus === 'success' && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="text-center text-green-500 mt-4"
+                    >
+                      Message sent successfully! I'll get back to you soon.
+                    </motion.p>
+                  )}
+                  {messageStatus === 'error' && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="text-center text-red-500 mt-4"
+                    >
+                      Failed to send message. Please try again later or contact me directly.
+                    </motion.p>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.form>
           </motion.div>
