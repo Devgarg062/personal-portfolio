@@ -1,0 +1,169 @@
+/* index.css */
+@import "@fontsource/poppins";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base Resets */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Blob Animation Utilities */
+@layer utilities {
+  .animate-blob {
+    animation: blob 8s infinite ease-in-out;
+  }
+  
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
+  @keyframes blob {
+    0%, 100% { 
+      transform: translate(0px, 0px) scale(1); 
+    }
+    33% { 
+      transform: translate(30px, -50px) scale(1.1); 
+    }
+    66% { 
+      transform: translate(-20px, 20px) scale(0.9); 
+    }
+  }
+}
+
+/* Smooth Scrolling */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4f46e5;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6366f1;
+}
+
+/* Selection Styling */
+::selection {
+  background: #4f46e5;
+  color: white;
+}
+
+/* Font Smoothing */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Fix for anchor links with fixed header */
+section {
+  scroll-margin-top: 80px;
+}
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4f46e5;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6366f1;
+}
+
+/* Selection styling */
+::selection {
+  background: #4f46e5;
+  color: white;
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Better focus states */
+button:focus, a:focus, input:focus, textarea:focus {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-shift {
+  background-size: 400% 400%;
+  animation: gradient-shift 12s ease infinite;
+}
+/* index.css */
+.bg-purple-gradient {
+  position: fixed;
+  inset: 0;
+  z-index: -50;
+  pointer-events: none;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(ellipse at 50% 0%, #a259e6 45%, #2d0922 70%, #000 100%);
+  /* Optional: smooth transition if you toggle dark/light mode */
+  transition: opacity 0.5s;
+}
+/* index.css */
+.bg-hero-gradient {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -50;
+  pointer-events: none;
+
+  background: linear-gradient(
+    180deg,
+    #19143e 0%,     /* Dark purple at the top */
+    #572e7c 30%,    /* Medium purple mid-top */
+    #c162e6 55%,    /* Emanating bright purple center */
+    #572e7c 77%,    /* Repeat medium for fade-out effect */
+    #19143e 100%    /* Dark purple at the bottom */
+  );
+  /* Optional: smooth transition for dark/light toggle */
+  transition: opacity 0.5s;
+}
